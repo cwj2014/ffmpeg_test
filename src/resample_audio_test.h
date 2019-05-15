@@ -120,13 +120,13 @@ int resample_audio_test(){
             const AVCodec* pCodec =  avcodec_find_decoder(stream->codecpar->codec_id);
             audioContext = avcodec_alloc_context3(pCodec);
             avcodec_parameters_to_context(audioContext, stream->codecpar);
-            av_codec_set_pkt_timebase(audioContext, stream->time_base);
+            //av_codec_set_pkt_timebase(audioContext, stream->time_base);
 
             if(avcodec_open2(audioContext, pCodec, nullptr)<0){
                return -1;
             }
             audio_stream_index = i;
-            break;
+            //break;
         }     
     }
     
@@ -135,14 +135,7 @@ int resample_audio_test(){
     if(avformat_alloc_output_context2(&oAVformatCtx, nullptr, nullptr, oFileName)<0){
         return -1;
     }
-    AVStream* oAudioStream = avformat_new_stream(oAVformatCtx, nullptr);
-    if(oAudioStream==nullptr){
-        return -1;
-    }
-
-    if(avio_open(&oAVformatCtx->pb, oFileName, AVIO_FLAG_READ_WRITE)<0){
-        return -1;
-    }
+   
     const AVCodec *codec = avcodec_find_encoder(oAVformatCtx->oformat->audio_codec);
     AVCodecContext* outputCodecCtx = avcodec_alloc_context3(codec);
     if (!outputCodecCtx) {
@@ -169,10 +162,21 @@ int resample_audio_test(){
         fprintf(stderr, "Could not open codec\n");
         exit(1);
     }
+
+     AVStream* oAudioStream = avformat_new_stream(oAVformatCtx, nullptr);
+    if(oAudioStream==nullptr){
+        return -1;
+    }
     //非常重要
     avcodec_parameters_from_context(oAudioStream->codecpar, outputCodecCtx);
 
-    avformat_write_header(oAVformatCtx, nullptr);
+     if(avio_open(&oAVformatCtx->pb, oFileName, AVIO_FLAG_READ_WRITE)<0){
+        return -1;
+    }
+
+    if(avformat_write_header(oAVformatCtx, nullptr)<0){
+        return -1;
+    }
     
     std::shared_ptr<SwrCtxManager> swrCtxManager = nullptr;
     if(audioContext->sample_rate != outputCodecCtx->sample_rate ||

@@ -87,13 +87,13 @@ public:
         return (const uint8_t **)m_dest_data;
     }
     ~SwrCtxManager(){
-          if(swr_ctx){
-              swr_free(&swr_ctx);
-          }
-          if(m_dest_data){
-              av_freep(&m_dest_data[0]);
-          }
-          av_free(m_dest_data);
+        if(swr_ctx){
+            swr_free(&swr_ctx);
+        }
+        if(m_dest_data){
+            av_freep(&m_dest_data[0]);
+        }
+        av_free(m_dest_data);
     }
 private:
      SwrContext *swr_ctx;

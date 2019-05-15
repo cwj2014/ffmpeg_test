@@ -7,6 +7,9 @@
 #include "decode_video_output_yuv420_test.h"
 #include "decode_h264_test.h"
 #include "resample_audio_test.h"
+#include "remuxing_test.h"
+#include "av_util_dictionary_test.h"
+#include "av_util_avclass_avoption_test.h"
 
 
 int main(){
@@ -18,6 +21,9 @@ int main(){
     //merge_2mp4_output_mp4();
     //separate_mp4_output_audio_video_mp4_test();
     //video_avfilter_test();
-    resample_audio_test();
+    //resample_audio_test();
+    //remuxing_test();
+    //av_dictionary_test();
+    avclass_avoption_test();
     return 0;
 }

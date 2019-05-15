@@ -45,6 +45,7 @@ int encode_video_output_mp4_test(){
 		exit(1);
 	}
     avcodec_parameters_from_context(vStream->codecpar, pCodecCtx);
+    //vStream->time_base = AVRational{1, 25000};
 
     auto callback = [&](AVCodecContext* ctx,const AVPacket* avpkt){
             
@@ -56,7 +57,9 @@ int encode_video_output_mp4_test(){
             av_packet_free(&pkt);
         };
 
-    avformat_write_header(avformatctx, nullptr);
+    if(avformat_write_header(avformatctx, nullptr)<0){
+        return -1;
+    }
     AVFrame* inframe = av_frame_alloc();
     int i=0;
     while(1){
