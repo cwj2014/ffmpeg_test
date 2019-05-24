@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <stdio.h>
-#include "yuv420p_util.h"
+#include "file_avframe_util.h"
 #include "codecimpl.h"
 
 int encode_video_output_mp4_test(){

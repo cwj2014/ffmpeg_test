@@ -10,6 +10,8 @@
 #include "remuxing_test.h"
 #include "av_util_dictionary_test.h"
 #include "av_util_avclass_avoption_test.h"
+#include "decode_video_output_one_image.h"
+#include "decode_audio_output_pcm_test.h"
 
 
 int main(){
@@ -24,6 +26,8 @@ int main(){
     //resample_audio_test();
     //remuxing_test();
     //av_dictionary_test();
-    avclass_avoption_test();
+    //avclass_avoption_test();
+    //decode_video_output_one_image_test();
+    decode_audio_output_pcm_test();
     return 0;
 }

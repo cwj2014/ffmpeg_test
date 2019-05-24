@@ -35,8 +35,76 @@ const AVClass g_avcls{
     .version = LIBAVUTIL_VERSION_INT
 };
 
+class IPlayControl{
+public:
+    virtual void play() = 0;
+    virtual void pause() = 0;
+    virtual void stop() = 0;
+};
+
+class IPlayControlView{
+public:
+    virtual void setPlayControl(IPlayControl* interface) = 0;
+};
+
+class PlayControlView: public IPlayControlView{
+public:
+    void setPlayControl(IPlayControl* interface) override{
+        _interface = interface;
+    }
+    void start(){
+        if(_interface != nullptr){
+            _interface->play();
+        }
+    }
+    void pause(){
+        if(_interface != nullptr){
+            _interface->pause();
+        }
+    }
+    void stop(){
+        if(_interface != nullptr){
+            _interface->stop();
+        }
+    }
+private:
+    IPlayControl* _interface;
+};
+
+class PlayView : public IPlayControl{
+public:
+    void play() override{
+        printf("play\n");
+    }
+    void pause() override{
+        printf("pause\n");
+    }
+    void stop() override{
+        printf("stop\n");
+    }
+    void setPlayControlView(IPlayControlView * interface){
+        interface->setPlayControl(this);
+    }
+};
+
+
+
 
 int avclass_avoption_test(){
+    
+    {
+        PlayControlView* controlView = new PlayControlView();
+        PlayView* playView = new PlayView();
+        playView->setPlayControlView(controlView);
+        controlView->start();
+        controlView->pause();
+        controlView->stop();
+
+        delete controlView;
+        delete playView;
+    }
+    
+
     AVCLSTEST* ccc = (AVCLSTEST*)av_mallocz(sizeof(AVCLSTEST));
     ccc->avcls = &g_avcls;
     ccc->kkk = 10;

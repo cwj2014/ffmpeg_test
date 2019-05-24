@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <stdio.h>
-#include "yuv420p_util.h"
+#include "file_avframe_util.h"
 
 
 int video_avfilter_test(){
@@ -33,52 +33,58 @@ int video_avfilter_test(){
 	//当前是视频数据做为源数据，所以当前的参数如上，具体：buffer=width=320:height=240:pix_fmt=yuv410p:time_base=1/24:sar=1
 	//buffer=video_size=320x240:pixfmt=6:time_base=1/24:pixel_aspect=1/1
 	avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in", in_args, NULL, filter_graph);
-
 	/*************************************************buffersink过滤器***************************************************/
 	//根据名字获取buffersink过滤器，buffersink过滤器是输出过滤后的数据，如缩放后的yuv420p数据
 	const AVFilter *buffersink = avfilter_get_by_name("buffersink");
 	//输出数据的格式设置
 	AVBufferSinkParams *buffersink_params = av_buffersink_params_alloc();
-	buffersink_params->pixel_fmts = &pix_fmts;
+	AVPixelFormat out_pix_fmts[] = {AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUVJ420P, AV_PIX_FMT_YUVJ422P, AV_PIX_FMT_NONE};
+	buffersink_params->pixel_fmts = out_pix_fmts;
 	AVFilterContext* buffersink_ctx;
 	avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out", NULL, buffersink_params, filter_graph);
 	av_free(buffersink_params);
-
-//	/**********************************************scale过滤器**********************************************************/
-//	//根据名字获取scale过滤器，这个过滤器ffmpeg库已经实现了这个过滤器，其内部实现和swscale库实现一样
-//	const AVFilter *scalefilter = avfilter_get_by_name("scale");
-//	AVFilterContext* scalefilter_ctx;
-//	char scale_args[512];
-//	snprintf(scale_args, sizeof(scale_args), "%d:%d", width/2, height/2);//参数是如scale=128:64
-//	avfilter_graph_create_filter(&scalefilter_ctx, scalefilter, "resize", scale_args, NULL, filter_graph);
-//    /*********************************************各个设备上下文链接*******************************************************/
-//	int ret = avfilter_link(buffersrc_ctx, 0, scalefilter_ctx, 0);
-//	ret = avfilter_link(scalefilter_ctx, 0, buffersink_ctx, 0);
-//	/*****************************************到此为止已经将各个filter串连起来***********************************************/
-//	//到此为止，过滤器的图初始化完毕
-//	avfilter_graph_config(filter_graph, NULL);
-
-	int ret = 0;
-
-	//new一个pin,并与buffer过滤器设备上正文相关联
-	AVFilterInOut *outputs = avfilter_inout_alloc();
-	outputs->name       = av_strdup("in");
-	outputs->filter_ctx = buffersrc_ctx;
-	outputs->pad_idx    = 0;
-	outputs->next       = NULL;
-	//new一个pin,并与buffersink过滤器设备上正文相关联
-	AVFilterInOut *inputs  = avfilter_inout_alloc();
-	inputs->name       = av_strdup("out");
-	inputs->filter_ctx = buffersink_ctx;
-	inputs->pad_idx    = 0;
-	inputs->next       = NULL;
-
+	/**********************************************scale过滤器**********************************************************/
+	//根据名字获取scale过滤器，这个过滤器ffmpeg库已经实现了这个过滤器，其内部实现和swscale库实现一样
+	const AVFilter *scalefilter = avfilter_get_by_name("scale");
+	AVFilterContext* scalefilter_ctx;
 	char scale_args[512];
-	snprintf(scale_args, sizeof(scale_args), "scale=%d:%d", width/2, height/2);//参数是如scale=128:64
-	//在两个pin之间插入一个字符串描述的过滤器，如上的scale绽放过滤器
-	avfilter_graph_parse_ptr(filter_graph, scale_args, &inputs, &outputs, NULL);
+	snprintf(scale_args, sizeof(scale_args), "%d:%d", width/2, height/2);//参数是如scale=128:64
+	avfilter_graph_create_filter(&scalefilter_ctx, scalefilter, "resize", scale_args, NULL, filter_graph);
+   /********************************************转换frame格式********************************************************/
+    const AVFilter *pixfmtfilter = avfilter_get_by_name("format");
+	AVFilterContext* pixfmtfilter_ctx;
+	char pixfmt_args[512];
+	snprintf(pixfmt_args, sizeof(pixfmt_args), "pix_fmts=%d", AV_PIX_FMT_YUVJ420P);//format=pix_fmts=yuv420p
+	avfilter_graph_create_filter(&pixfmtfilter_ctx, pixfmtfilter, "format", pixfmt_args, NULL, filter_graph);
+	/**********************************************各个设备上下文链接*************************************************************************/
+	int ret = avfilter_link(buffersrc_ctx, 0, scalefilter_ctx, 0);
+	ret = avfilter_link(scalefilter_ctx, 0, pixfmtfilter_ctx, 0);
+	ret = avfilter_link(pixfmtfilter_ctx, 0, buffersink_ctx, 0);
+	/*****************************************到此为止已经将各个filter串连起来***********************************************/
 	//到此为止，过滤器的图初始化完毕
 	avfilter_graph_config(filter_graph, NULL);
+
+	// int ret = 0;
+
+	// //new一个pin,并与buffer过滤器设备上正文相关联
+	// AVFilterInOut *outputs = avfilter_inout_alloc();
+	// outputs->name       = av_strdup("in");
+	// outputs->filter_ctx = buffersrc_ctx;
+	// outputs->pad_idx    = 0;
+	// outputs->next       = NULL;
+	// //new一个pin,并与buffersink过滤器设备上正文相关联
+	// AVFilterInOut *inputs  = avfilter_inout_alloc();
+	// inputs->name       = av_strdup("out");
+	// inputs->filter_ctx = buffersink_ctx;
+	// inputs->pad_idx    = 0;
+	// inputs->next       = NULL;
+
+	// char scale_args[512];
+	// snprintf(scale_args, sizeof(scale_args), "scale=%d:%d", width/2, height/2);//参数是如scale=128:64
+	// //在两个pin之间插入一个字符串描述的过滤器，如上的scale绽放过滤器
+	// avfilter_graph_parse_ptr(filter_graph, scale_args, &inputs, &outputs, NULL);
+	// //到此为止，过滤器的图初始化完毕
+	// avfilter_graph_config(filter_graph, NULL);
 
  	AVFrame* inframe = av_frame_alloc();
  	AVFrame *filt_frame = av_frame_alloc();
@@ -105,7 +111,7 @@ int video_avfilter_test(){
 			   break;
 		   if (ret < 0)
 			   break;
-		   WriteYUV420ToFile(filt_frame, wFile);//将处理后的AVFrame写入到文件
+		   //WriteYUV420ToFile(filt_frame, wFile);//将处理后的AVFrame写入到文件
 	
 		   av_frame_unref(filt_frame);
 

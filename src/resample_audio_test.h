@@ -5,6 +5,7 @@
 #include "codecimpl.h"
 #include <memory>
 #include "audio_convert_tool.h"
+#include "file_avframe_util.h"
 
 
 /* check that a given sample format is supported by the encoder */
@@ -202,7 +203,10 @@ int resample_audio_test(){
     //是否读文件结束
     bool read_eof = false;
 
+    FILE* pcmFile = fopen("./test.pcm", "wb");
+
     auto callback = [&](AVCodecContext *ctx, const AVFrame* frame){
+        WritePCMToFile(frame, pcmFile);
         if(swrCtxManager != nullptr){ //转换
             int ret = swrCtxManager->Convert((const uint8_t**)frame->extended_data, frame->nb_samples);//wr_convert(swrCtxManager->swr_ctx, dst_data, dst_nb_samples, (const uint8_t**)frame->extended_data, frame->nb_samples);
             if(ret > 0){//add to Audio_FIFO
@@ -259,6 +263,7 @@ int resample_audio_test(){
 
     av_write_trailer(oAVformatCtx);
     
+    fclose(pcmFile);
 
     return 0;
 }
