@@ -81,8 +81,10 @@ int remuxing_test(){
              av_packet_unref(pkt);
              continue;
         }
-        AVStream *in_stream = iter->second.in;
-        AVStream *out_stream = iter->second.out;
+        AVStream *in_stream = in_avformat_ctx->streams[pkt->stream_index];
+        AVStream *out_stream = out_avformat_ctx->streams[pkt->stream_index];
+        //AVStream *in_stream = iter->second.in;
+        //AVStream *out_stream = iter->second.out;
         pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
         pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
         pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);

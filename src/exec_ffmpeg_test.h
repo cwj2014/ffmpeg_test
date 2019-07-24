@@ -33,7 +33,9 @@ int exec_ffmpeg_test()
 {
     printf("start progrom\n");
     int childStatus= 0;
-    char *argList[]={"ffmpeg","--help",NULL};
+    //char* cmd = "-ss 5 -t 10 -accurate_seek -i ./半壶纱.mp4 -codec copy -avoid_negative_ts 1 ./cut.mp4";
+    char *argList[]={"ffmpeg","-ss 5 -t 10 -accurate_seek -i ./半壶纱.mp4 -codec copy -avoid_negative_ts 1 ./cut.mp4",NULL};
+    
     spawn("/home/caiyu/ffmpeg_install/bin/ffmpeg",argList);
     wait(&childStatus);
     if(WIFEXITED (childStatus))

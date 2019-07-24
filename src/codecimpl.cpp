@@ -24,7 +24,8 @@ int encode(AVCodecContext *ctx, const AVFrame *frame, OnEncodeSuccess onSucess){
             result = -1;
             break;
         }else{
-            onSucess(ctx, pkt);
+            if(onSucess!=nullptr)
+                onSucess(ctx, pkt);
             av_packet_unref(pkt);
         }
     }
@@ -52,7 +53,8 @@ int decode(AVCodecContext *ctx, const AVPacket* packet, OnDecodeSuccess onSucess
 			result = -1;
             break;
 		}else{
-            onSucess(ctx, frame);
+            if(onSucess!=nullptr)
+                onSucess(ctx, frame);
             av_frame_unref(frame);
         }
 	}
