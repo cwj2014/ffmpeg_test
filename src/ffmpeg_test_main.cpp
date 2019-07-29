@@ -16,6 +16,7 @@
 #include "audio_filter_aformat_output_pcm.h"
 #include "audio_filter_aresample_output_pcm.h"
 #include "cut_mp4_test.h"
+#include "generate_gif_test.h"
 
 
 int main(){
@@ -37,6 +38,7 @@ int main(){
     //audio_filter_aresample_test();
     // audio_filter_test();
     // decode_mix_audio_test();
-    cut_media_file_test();
+    //cut_media_file_test();
+    create_gif_test();
     return 0;
 }
