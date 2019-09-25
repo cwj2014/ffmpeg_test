@@ -17,6 +17,8 @@
 #include "audio_filter_aresample_output_pcm.h"
 #include "cut_mp4_test.h"
 #include "generate_gif_test.h"
+#include "merge_yuv420_test.h"
+#include "merge_image_test.h"
 
 
 int main(){
@@ -40,5 +42,7 @@ int main(){
     // decode_mix_audio_test();
     //cut_media_file_test();
     create_gif_test();
+    //merge_yuv420_test();
+    // merge_files_test();
     return 0;
 }

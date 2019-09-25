@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <stdio.h>
-#include "file_avframe_util.h"
+#include "avframe_util.h"
 #include "codecimpl.h"
 
 int encode_video_output_mp4_test(){
@@ -46,11 +46,16 @@ int encode_video_output_mp4_test(){
 	}
     avcodec_parameters_from_context(vStream->codecpar, pCodecCtx);
     //vStream->time_base = AVRational{1, 25000};
-
+    printf("pCodecCtx->time_base:%d, %d, vStream->time_base:%d, %d\n", 
+            pCodecCtx->time_base.num, pCodecCtx->time_base.den, vStream->time_base.num, vStream->time_base.den);
     auto callback = [&](AVCodecContext* ctx,const AVPacket* avpkt){
             
             AVPacket* pkt = av_packet_clone(avpkt);
             av_packet_rescale_ts(pkt, pCodecCtx->time_base, vStream->time_base);
+            printf("src: pts:%lld, dts:%lld, dest: pts:%lld, dts:%lld\n", avpkt->pts, avpkt->dts, pkt->pts, pkt->dts);
+            if(pkt->pts < pkt->dts){
+                printf("---------------------------------------------------------------\n");
+            }
             pkt->stream_index = vStream->index;
             av_write_frame(avformatctx, pkt);
             av_packet_unref(pkt);
@@ -60,6 +65,10 @@ int encode_video_output_mp4_test(){
     if(avformat_write_header(avformatctx, nullptr)<0){
         return -1;
     }
+
+    printf("after avformat_write_header >>>>pCodecCtx->time_base:%d, %d, vStream->time_base:%d, %d\n", 
+            pCodecCtx->time_base.num, pCodecCtx->time_base.den, vStream->time_base.num, vStream->time_base.den);
+
     AVFrame* inframe = av_frame_alloc();
     int i=0;
     while(1){

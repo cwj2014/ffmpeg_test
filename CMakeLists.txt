@@ -12,7 +12,7 @@ SET(PRONAME ffmpeg_test)
 
 #target
 ADD_EXECUTABLE(${PRONAME} src/ffmpeg_test_main.cpp
-                          src/file_avframe_util.cpp
+                          src/avframe_util.cpp
                           src/codecimpl.cpp)
 
 SET(FFMPEG_INSTALL /home/caiyu/ffmpeg_install)

@@ -3,7 +3,7 @@
 
 #include "global.h"
 #include "codecimpl.h"
-#include "file_avframe_util.h"
+#include "avframe_util.h"
 
 //duration 0:first 1:longest: 2: shortest;
 static const int mix_flags = 0;

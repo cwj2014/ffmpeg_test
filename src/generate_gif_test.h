@@ -188,7 +188,7 @@ end:
 
 
 int create_gif_test(){
-    const char* inputfile = "./半壶纱.mp4";
+    const char* inputfile = "./wd_091_tempMovie 6.mov";
     const char* outputfile = "./gen.gif";
     int time = 15;
     int width = 128;

@@ -22,19 +22,19 @@ char av_error[AV_ERROR_MAX_STRING_SIZE] = { 0 };
 
 
 void InitVideoAVCodecCtx(AVCodecContext* c, AVCodecID codecId, int width, int height){
-    //c->codec_id = codecId;
-    //c->codec_type = AVMEDIA_TYPE_VIDEO;
+    c->codec_id = codecId;
+    c->codec_type = AVMEDIA_TYPE_VIDEO;
 // 	/* put sample parameters */
-	//c->bit_rate = 400000;
+	c->bit_rate = 400000;
 	/* resolution must be a multiple of two */
-	//c->width = width;
-	//c->height = height;
+	c->width = width;
+	c->height = height;
 	/* frames per second */
 	c->time_base = (AVRational){1, 25};
 	c->framerate = (AVRational){25, 1};
 
 	c->gop_size = 12;
-	c->max_b_frames = 0;
+	c->max_b_frames = 2;
 	c->pix_fmt = AV_PIX_FMT_YUV420P;
     c->qmin = 10;
 	c->qmax = 51;

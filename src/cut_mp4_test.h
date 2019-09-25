@@ -141,76 +141,78 @@ int cut_media_file2(const char* inputfile, const char* outputfile, float startti
     pkt = av_packet_alloc();
     inframe = av_frame_alloc();
 
-    while(!isEndReadPacket(stream_exit, in_avformat_ctx)){
-        ret = av_read_frame(in_avformat_ctx, pkt);
-         if(ret!=0){
-            printf("read error or file end\n");
-            break;
-        }
-        AVStream *in_stream = in_avformat_ctx->streams[pkt->stream_index];
-        AVStream *out_stream = out_avformat_ctx->streams[pkt->stream_index];
-        // 时间超过要截取的时间，就退出循环
-        if (av_q2d(in_stream->time_base) * pkt->pts > endtime) {
-            stream_exit[pkt->stream_index] = 1;
-            av_packet_unref(pkt);
-            continue;
-        }
-        //视频进行二次编码
-        if(video_stream_index == pkt->stream_index){
-            bool b = av_q2d(in_stream->time_base) * pkt->pts >= starttime;
-            decode(vDecContext, pkt, [&](AVCodecContext* avctx, const AVFrame* frame){
-                if(b){
-                    inframe->format = AV_PIX_FMT_YUV420P;
-                    inframe->width  = frame->width;
-                    inframe->height = frame->height;
-                    av_frame_get_buffer(inframe, 32);
-                    av_image_copy(inframe->data, inframe->linesize, (const uint8_t**)frame->data, frame->linesize, AV_PIX_FMT_YUV420P,inframe->width, inframe->height);
-                    
-                    inframe->pts = pts++;
-                    inframe->pict_type = AV_PICTURE_TYPE_NONE;
-                    isNeedFlush = true;
-                    encode(vEncContext, inframe, [=](AVCodecContext* avc, const AVPacket* avpacket){
-
-                        AVPacket* newpkt = av_packet_clone(avpacket);
-                        av_packet_rescale_ts(newpkt, vEncContext->time_base, out_stream->time_base);
-                        newpkt->stream_index = video_stream_index;
-                        //printf("before rescale_ts: pts:%lld, dts:%lld, after rescale_ts:pts:%lld, dts:%lld\n", avpacket->pts, avpacket->dts, newpkt->pts, newpkt->dts);
-                        int ret = av_interleaved_write_frame(out_avformat_ctx, newpkt);
-                        av_packet_free(&newpkt);
-                        if (ret < 0) {
-                            fprintf(stderr, "Error muxing packet\n");
-                        }
-                    });
-                    av_frame_unref(inframe);
-                }
-            });
-        }else{
-            if(av_q2d(in_stream->time_base) * pkt->pts >= starttime){
-                // 将截取后的每个流的起始dts 、pts保存下来，作为开始时间，用来做后面的时间基转换
-                if (pre_dts[pkt->stream_index] == 0) {
-                    pre_dts[pkt->stream_index] = pkt->dts;
-                }
-                if (pre_pts[pkt->stream_index] == 0) {
-                    pre_pts[pkt->stream_index] = pkt->pts;
-                }
-
-                // 时间基转换
-                pkt->pts = av_rescale_q_rnd(pkt->pts - pre_pts[pkt->stream_index], in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
-                pkt->dts = av_rescale_q_rnd(pkt->dts - pre_dts[pkt->stream_index], in_stream->time_base,out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
-
-                //一帧视频播放时间必须在解码时间点之后，当出现pkt->pts < pkt->dts时会导致程序异常，所以我们丢掉有问题的帧，不会有太大影响。
-                if (pkt->pts < pkt->dts) {
-                    continue;
-                }
-                ret = av_interleaved_write_frame(out_avformat_ctx, pkt);
-                if (ret < 0) {
-                   fprintf(stderr, "Error muxing packet\n");
-                   break;
-                }
-               
+    {
+        while(!isEndReadPacket(stream_exit, in_avformat_ctx)){
+            ret = av_read_frame(in_avformat_ctx, pkt);
+            if(ret!=0){
+                printf("read error or file end\n");
+                break;
             }
+            AVStream *in_stream = in_avformat_ctx->streams[pkt->stream_index];
+            AVStream *out_stream = out_avformat_ctx->streams[pkt->stream_index];
+            // 时间超过要截取的时间，就退出循环
+            if (av_q2d(in_stream->time_base) * pkt->pts > endtime) {
+                stream_exit[pkt->stream_index] = 1;
+                av_packet_unref(pkt);
+                continue;
+            }
+            //视频进行二次编码
+            if(video_stream_index == pkt->stream_index){
+                bool b = av_q2d(in_stream->time_base) * pkt->pts >= starttime;
+                decode(vDecContext, pkt, [&](AVCodecContext* avctx, const AVFrame* frame){
+                    if(b){
+                        inframe->format = AV_PIX_FMT_YUV420P;
+                        inframe->width  = frame->width;
+                        inframe->height = frame->height;
+                        av_frame_get_buffer(inframe, 32);
+                        av_image_copy(inframe->data, inframe->linesize, (const uint8_t**)frame->data, frame->linesize, AV_PIX_FMT_YUV420P,inframe->width, inframe->height);
+                        
+                        inframe->pts = pts++;
+                        inframe->pict_type = AV_PICTURE_TYPE_NONE;
+                        isNeedFlush = true;
+                        encode(vEncContext, inframe, [=](AVCodecContext* avc, const AVPacket* avpacket){
+
+                            AVPacket* newpkt = av_packet_clone(avpacket);
+                            av_packet_rescale_ts(newpkt, vEncContext->time_base, out_stream->time_base);
+                            newpkt->stream_index = video_stream_index;
+                            //printf("before rescale_ts: pts:%lld, dts:%lld, after rescale_ts:pts:%lld, dts:%lld\n", avpacket->pts, avpacket->dts, newpkt->pts, newpkt->dts);
+                            int ret = av_interleaved_write_frame(out_avformat_ctx, newpkt);
+                            av_packet_free(&newpkt);
+                            if (ret < 0) {
+                                fprintf(stderr, "Error muxing packet\n");
+                            }
+                        });
+                        av_frame_unref(inframe);
+                    }
+                });
+            }else{
+                if(av_q2d(in_stream->time_base) * pkt->pts >= starttime){
+                    // 将截取后的每个流的起始dts 、pts保存下来，作为开始时间，用来做后面的时间基转换
+                    if (pre_dts[pkt->stream_index] == 0) {
+                        pre_dts[pkt->stream_index] = pkt->dts;
+                    }
+                    if (pre_pts[pkt->stream_index] == 0) {
+                        pre_pts[pkt->stream_index] = pkt->pts;
+                    }
+
+                    // 时间基转换
+                    pkt->pts = av_rescale_q_rnd(pkt->pts - pre_pts[pkt->stream_index], in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+                    pkt->dts = av_rescale_q_rnd(pkt->dts - pre_dts[pkt->stream_index], in_stream->time_base,out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
+
+                    //一帧视频播放时间必须在解码时间点之后，当出现pkt->pts < pkt->dts时会导致程序异常，所以我们丢掉有问题的帧，不会有太大影响。
+                    if (pkt->pts < pkt->dts) {
+                        continue;
+                    }
+                    ret = av_interleaved_write_frame(out_avformat_ctx, pkt);
+                    if (ret < 0) {
+                    fprintf(stderr, "Error muxing packet\n");
+                    break;
+                    }
+                
+                }
+            }
+            av_packet_unref(pkt);
         }
-        av_packet_unref(pkt);
     }
     //二次编码
     if(isNeedFlush)
