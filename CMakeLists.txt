@@ -17,6 +17,7 @@ ADD_EXECUTABLE(${PRONAME} src/ffmpeg_test_main.cpp
 
 SET(FFMPEG_INSTALL /home/caiyu/ffmpeg_install)
 SET(X264_INSTALL /home/caiyu/x264_install)
+SET(X265_INSTALL /home/caiyu/x265_install)
 SET(LAME_INSTALL /home/caiyu/lame_install)
 
 INCLUDE_DIRECTORIES(${FFMPEG_INSTALL}/include)
@@ -29,6 +30,7 @@ find_library(SWRESAMPLE_PATH swresample ${FFMPEG_INSTALL}/lib)
 find_library(AVCODEC_PATH avcodec ${FFMPEG_INSTALL}/lib)
 find_library(AVUTIL_PATH avutil ${FFMPEG_INSTALL}/lib)
 find_library(X264_PATH x264 ${X264_INSTALL}/lib)
+find_library(X265_PATH x265 ${X265_INSTALL}/lib)
 find_library(LAME_PATH mp3lame ${LAME_INSTALL}/lib)
 
 
@@ -41,7 +43,13 @@ SET(LIBS ${AVFILTER_PATH}
          ${AVUTIL_PATH}
          z
          lzma
+         stdc++
+         m
+         rt
          ${X264_PATH}
+         ${X265_PATH}
+         dl
+         numa
          ${LAME_PATH}
          pthread)
 

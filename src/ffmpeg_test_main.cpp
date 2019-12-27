@@ -19,17 +19,23 @@
 #include "generate_gif_test.h"
 #include "merge_yuv420_test.h"
 #include "merge_image_test.h"
+#include "encode_video_output_h265_test.h"
+#include "encode_video_output_10bith265_test.h"
+#include "decode_h265_test.h"
 
 
 int main(){
-    //decode_h264_test();
-    //decode_video_output_yuv420_test();
+    // decode_h264_test();
+    decode_h265_test();
+    // decode_video_output_yuv420_test();
     //encode_video_output_h264_test();
+    // encode_video_output_h265_test();
+    // encode_video_output_h265_test2();
     //encode_video_output_mp4_test();
     // exec_ffmpeg_test();
     //merge_2mp4_output_mp4();
     //separate_mp4_output_audio_video_mp4_test();
-    //video_avfilter_test();
+    // video_avfilter_test();
     //resample_audio_test();
     //remuxing_test();
     //av_dictionary_test();
@@ -41,7 +47,7 @@ int main(){
     // audio_filter_test();
     // decode_mix_audio_test();
     //cut_media_file_test();
-    create_gif_test();
+    // create_gif_test();
     //merge_yuv420_test();
     // merge_files_test();
     return 0;

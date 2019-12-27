@@ -1,5 +1,5 @@
-#ifndef DECODEC_H264_TEST_H_H_
-#define DECODEC_H264_TEST_H_H_
+#ifndef DECODEC_H265_TEST_H_H_
+#define DECODEC_H265_TEST_H_H_
 
 #include "global.h"
 #include <cstdio>
@@ -13,16 +13,16 @@
 
 #define INBUF_SIZE 4096
 
-int decode_h264_test(){
-    const char* iFileName = "test.h264";
+int decode_h265_test(){
+    const char* iFileName = "test2.h265";
     FILE* ifile = fopen(iFileName, "rb");
     if(ifile == NULL)
         return -1;
-    const char* oFileName = "hello.yuv";
+    const char* oFileName = "output.yuv";
     FILE* ofile = fopen(oFileName, "wb");
     if(ifile == NULL)
-        ofile -1;
-    AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_H264); 
+        return -1;
+    AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_H265); 
     AVCodecContext* avcodecCtx =  avcodec_alloc_context3(codec);
     if(avcodec_open2(avcodecCtx, codec, nullptr) < 0){
         return -1;
@@ -46,7 +46,7 @@ int decode_h264_test(){
     av_init_packet(pkt);
 
      auto callback = [&](AVCodecContext *ctx, const AVFrame* frame){
-         WriteYUV420ToFile(frame, ofile);
+         WriteYUV420P10LEToFile(frame, ofile);
          printf("解码成功\n");
      };
 
