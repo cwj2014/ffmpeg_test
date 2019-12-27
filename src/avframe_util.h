@@ -6,8 +6,10 @@
 struct AVFrame;
 //写入YUV420
 void WriteYUV420ToFile(const AVFrame *frame, FILE* f);
+void WriteYUV420P10LEToFile(const AVFrame *frame, FILE* f);
 //读取YUV420
 void ReadYUV420FromFile(AVFrame *frame, FILE *f);
+void ReadYUV420P10LEFromFile(AVFrame *frame, FILE *f);
 //写入PCM
 void WritePCMToFile(const AVFrame *frame, FILE* f);
 //读取PCM
