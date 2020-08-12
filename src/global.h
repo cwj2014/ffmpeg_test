@@ -50,7 +50,7 @@ int InitABufferFilter(AVFilterGraph* filterGraph, AVFilterContext** filterctx, c
     *filterctx = NULL;
     char in_args[512];
     snprintf(in_args, sizeof(in_args),
-			"time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%"PRId64,
+			"time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%" PRId64,
 			timebase.num, timebase.den, samplerate,
 			av_get_sample_fmt_name(format),
 			channel_layout);
@@ -100,6 +100,48 @@ int InitABufferSinkFilter(AVFilterGraph* filterGraph, AVFilterContext** filterct
 	}while(0);
 	
 	return ret;
+}
+
+
+uint8_t* getNulu(const uint8_t* source, uint64_t& start_pos, uint64_t end_pos, uint64_t& nulu_size){
+    nulu_size = 0;
+    uint64_t pos = start_pos;
+    start_pos = 0;
+    while(pos < end_pos - 4){
+        if(source[pos]== 0x00 && source[pos+1] == 0x00){
+            if(source[pos+2] == 0x01){
+                start_pos = pos + 3;
+            }else if(source[pos+2] == 0x00 && source[pos+3] == 0x01){
+                start_pos = pos + 4;
+            }
+        }
+        if(start_pos != 0){
+            break;
+        }
+        pos += 1;
+    }
+    uint8_t* nulu = nullptr;
+    if(start_pos != 0){
+        pos = start_pos;
+        while(pos < end_pos - 4){
+            if(source[pos]== 0x00 && source[pos+1] == 0x00){
+                if(source[pos+2] == 0x01){
+                   break;
+                }else if(source[pos+2] == 0x00 && source[pos+3] == 0x01){
+                    break;
+                }
+            }
+            pos += 1;
+            nulu_size += 1;
+        }
+        if(pos >= end_pos - 4){//last nulu
+             nulu_size += end_pos - pos; 
+        }
+        nulu = new uint8_t[nulu_size];
+        memcpy(nulu, source + start_pos, nulu_size);
+        start_pos += nulu_size;
+    }
+    return nulu;
 }
 
 #endif

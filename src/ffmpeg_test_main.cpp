@@ -22,15 +22,22 @@
 #include "encode_video_output_h265_test.h"
 #include "encode_video_output_10bith265_test.h"
 #include "decode_h265_test.h"
-
+#include "encode_oneframe_yuv420p10le_output_heif.h"
+#include "decode_heic_output_yuv420_test.h"
+#include "encode_oneframe_yuv420p_output_heif.h"
+#include "encode_frames_yuv420p_output_heif.h"
+#include "yuv_transfer_test.h"
 
 int main(){
     // decode_h264_test();
-    decode_h265_test();
+    //decode_h265_test();
     // decode_video_output_yuv420_test();
     //encode_video_output_h264_test();
     // encode_video_output_h265_test();
     // encode_video_output_h265_test2();
+    // encode_yuv420p10le_output_heif();
+    // encode_yuv420_output_heif();
+    //encode_yuv420_output_heif2();
     //encode_video_output_mp4_test();
     // exec_ffmpeg_test();
     //merge_2mp4_output_mp4();
@@ -50,5 +57,7 @@ int main(){
     // create_gif_test();
     //merge_yuv420_test();
     // merge_files_test();
+    //decode_heic_output_yuv420();
+    yuv_transfer_test();
     return 0;
 }

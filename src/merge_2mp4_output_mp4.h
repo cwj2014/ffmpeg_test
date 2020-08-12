@@ -9,13 +9,13 @@
 #include <stdio.h>
 #include <memory>
 
-struct MediaInfo{
+struct _MediaInfo{
     AVFormatContext* inAVFormatCtx;
     AVStream* outStream;
     int stream_index;
 };
 
-std::shared_ptr<MediaInfo> InitStream(AVFormatContext* outFormatCtx, const char* filepath, AVMediaType type){
+std::shared_ptr<_MediaInfo> InitStream(AVFormatContext* outFormatCtx, const char* filepath, AVMediaType type){
     AVFormatContext* ofctx = nullptr;
     if(avformat_open_input(&ofctx, filepath, nullptr, nullptr)<0){
         return nullptr;
@@ -31,14 +31,14 @@ std::shared_ptr<MediaInfo> InitStream(AVFormatContext* outFormatCtx, const char*
             break;
         }  
     }
-    auto ptr = std::make_shared<MediaInfo>();
+    auto ptr = std::make_shared<_MediaInfo>();
     ptr->stream_index = stream_index;
     ptr->inAVFormatCtx = ofctx;
     ptr->outStream = avStream;
     return ptr;
 }
 
-bool ReadPacket(std::shared_ptr<MediaInfo> mediaInfo, AVPacket* pkt){
+bool ReadPacket(std::shared_ptr<_MediaInfo> mediaInfo, AVPacket* pkt){
     bool readpkt = false;
     while(true){//直到读取到视频数据为止
         if(av_read_frame(mediaInfo->inAVFormatCtx, pkt)<0){
@@ -65,8 +65,8 @@ int merge_2mp4_output_mp4(){
         return -1;
     }
 
-    std::shared_ptr<MediaInfo> audioMediaInfo = InitStream(outFormatCtx, audioInFileName, AVMEDIA_TYPE_AUDIO);
-    std::shared_ptr<MediaInfo> videoMediaInfo = InitStream(outFormatCtx, videoInFileName, AVMEDIA_TYPE_VIDEO);
+    std::shared_ptr<_MediaInfo> audioMediaInfo = InitStream(outFormatCtx, audioInFileName, AVMEDIA_TYPE_AUDIO);
+    std::shared_ptr<_MediaInfo> videoMediaInfo = InitStream(outFormatCtx, videoInFileName, AVMEDIA_TYPE_VIDEO);
 
     if(avio_open(&outFormatCtx->pb, outputFileName, AVIO_FLAG_WRITE)<0){
         return -1;

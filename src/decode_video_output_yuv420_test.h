@@ -14,9 +14,20 @@
 int decode_video_output_yuv420_test(){
     const char * inFileName = "./123.mp4";
     AVFormatContext * avformatctx = nullptr;
-    if(avformat_open_input(&avformatctx, inFileName, nullptr, nullptr)<0){
+    AVDictionary *options = NULL;
+    av_dict_set_int(&options, "probesize", 10240L, 0);
+    av_dict_set_int(&options, "analyzeduration", 100L, 0);
+    if(avformat_open_input(&avformatctx, inFileName, nullptr, &options)<0){
         return -1;
     }
+    
+    AVDictionaryEntry* entry = nullptr;
+    while(entry = av_dict_get(options, "", entry, AV_DICT_IGNORE_SUFFIX)){
+        printf("key:%s, value:%s\n", entry->key, entry->value);
+    }
+    //释放AVDictionary
+    av_dict_free(&options);
+
     avformat_find_stream_info(avformatctx, nullptr);
     AVCodecContext** pAVCodecCtx = (AVCodecContext**)malloc(avformatctx->nb_streams*sizeof(AVCodecContext*));
     int audio_stream_index, video_stream_index;
