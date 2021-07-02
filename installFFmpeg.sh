@@ -5,10 +5,27 @@ set -e
 ROOT=`pwd`
 INSTALL_DIR=$ROOT/libdeps_install
 LIBDEPS_SOURCE=$ROOT/libdeps
-mkdir ${LIBDEPS_SOURCE}
+if [ ! -d $LIBDEPS_SOURCE ]; then
+   mkdir ${LIBDEPS_SOURCE}
+fi
 
 #install hg: sudo apt-get install mercurial
 #install numa: apt-get install -y libnuma-dev
+
+install_lame(){
+   echo "---------begin install lamemp3--------------"
+   cd ${LIBDEPS_SOURCE}
+   dir=lame-3.100
+   url=https://nchc.dl.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
+   if [ ! -d $dir ]; then
+     curl -O ${url}
+     tar -xzvf lame-3.100.tar.gz
+   fi
+   cd ${dir}
+   ./configure --prefix=${INSTALL_DIR}
+   make -j4
+   make install
+}
 
 
 install_x264(){
@@ -91,6 +108,7 @@ install_FFmpeg(){
                --enable-nonfree \
                --enable-libx264 \
                --enable-libx265 \
+               --enable-libmp3lame \
                --enable-pic \
                --disable-asm \
                --extra-cflags=-I${INSTALL_DIR}/include \
@@ -100,6 +118,7 @@ install_FFmpeg(){
    make install         
 }
 
+install_lame
 install_x264
 install_x265
 install_FFmpeg
