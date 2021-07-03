@@ -55,8 +55,8 @@ static AVClass scoreInfo_avcls = {
     .parent_log_context_offset = 0,
     .child_next = score_info_next,
     .category = AV_CLASS_CATEGORY_NA,
-    .get_category = NULL,
-    .query_ranges = NULL,
+    .get_category = av_default_get_category,
+    .query_ranges = av_opt_query_ranges_default,
     .child_class_iterate = socre_info_child_class_iterate 
 };
 
