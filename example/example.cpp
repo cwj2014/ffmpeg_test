@@ -5,6 +5,8 @@ extern void AVRational_Example();
 extern void AVBuffer_Example();
 extern void AVSample_Example();
 extern void AVFifoBuffer_Example();
+extern void AVAudioFifo_Example();
+extern void AVFrame_Example();
 
 int main(){
     AVOption_Example();
@@ -14,5 +16,7 @@ int main(){
     AVBuffer_Example();
     AVSample_Example();
     AVFifoBuffer_Example();
+    AVAudioFifo_Example();
+    AVFrame_Example();
     return 0;
 }
