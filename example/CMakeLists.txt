@@ -1,1 +1,2 @@
 ADD_SUBDIRECTORY(avutil)
+ADD_SUBDIRECTORY(avformat)

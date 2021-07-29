@@ -7,7 +7,10 @@ extern void AVSample_Example();
 extern void AVFifoBuffer_Example();
 extern void AVAudioFifo_Example();
 extern void AVFrame_Example();
-
+extern void AVMath_Example();
+//////////////////////////////////////////////
+extern void AVFormatInput_Example();
+extern void AVStream_Example();
 int main(){
     AVOption_Example();
     AVDictionary_Example();
@@ -18,5 +21,9 @@ int main(){
     AVFifoBuffer_Example();
     AVAudioFifo_Example();
     AVFrame_Example();
+    AVMath_Example();
+
+    AVFormatInput_Example();
+    AVStream_Example();
     return 0;
 }
